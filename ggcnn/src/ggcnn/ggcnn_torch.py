@@ -65,6 +65,7 @@ def predict(depth, process_depth=True, crop_size=300, out_size=300, depth_nan_ma
         depth, depth_nan_mask = process_depth_image(depth, crop_size, out_size=out_size, return_mask=True, crop_y_offset=crop_y_offset)
 
     # Inference
+    # np.clip(array,min,max) => array에 대해 min보자 작은 값들은 min max보다 작은 값들은 max로 변경
     depth = np.clip((depth - depth.mean()), -1, 1)
     depthT = torch.from_numpy(depth.reshape(1, 1, out_size, out_size).astype(np.float32)).to(device)
     with torch.no_grad():
@@ -74,13 +75,16 @@ def predict(depth, process_depth=True, crop_size=300, out_size=300, depth_nan_ma
     points_out[depth_nan_mask] = 0
 
     # Calculate the angle map.
+    # angle 계산
     cos_out = pred_out[1].cpu().numpy().squeeze()
     sin_out = pred_out[2].cpu().numpy().squeeze()
+    # 위의 두 값을 이용하여 계산
     ang_out = np.arctan2(sin_out, cos_out) / 2.0
 
     width_out = pred_out[3].cpu().numpy().squeeze() * 150.0  # Scaled 0-150:0-1
 
     # Filter the outputs.
+    # gaussian_filter를 이용하여 filtering => 화질이 낮아서 blur처리를 해줌
     if filters[0]:
         points_out = ndimage.filters.gaussian_filter(points_out, filters[0])  # 3.0
     if filters[1]:
@@ -97,4 +101,4 @@ def predict(depth, process_depth=True, crop_size=300, out_size=300, depth_nan_ma
 
     # points_out = (points_out - points_out.min())/(points_out.max() - points_out.min())
 
-    return points_out, ang_out, width_out, depth.squeeze()
+    return points_out, ang_out, width_out, depth.squeeze() #squeeze => 차원 하나 낮춤

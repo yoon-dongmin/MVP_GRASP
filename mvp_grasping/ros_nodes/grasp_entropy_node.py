@@ -14,16 +14,16 @@ import dougsm_helpers.tf_helpers as tfh
 from tf import transformations as tft
 from dougsm_helpers.timeit import TimeIt
 
-from ggcnn.ggcnn import predict, process_depth_image
-from mvp_grasping.grasp_stats import update_batch, update_histogram_angle
-from mvp_grasping.gridworld import GridWorld
-from dougsm_helpers.gridshow import gridshow
+from ggcnn.ggcnn import predict, process_depth_image #ggcnn결과로 부터 predict값 가져옴
+from mvp_grasping.grasp_stats import update_batch, update_histogram_angle #scr/grasp stats에서 다음 두개의 함수를 가져옴
+from mvp_grasping.gridworld import GridWorld #gridworl 함수를 불러옴
+from dougsm_helpers.gridshow import gridshow #하나의 grid에 images를 보여주는 함수인 grid show를 가져옴
 
 from mvp_grasping.srv import NextViewpoint, NextViewpointResponse, AddFailurePoint, AddFailurePointResponse
 from sensor_msgs.msg import Image, CameraInfo
 from std_srvs.srv import Empty as EmptySrv, EmptyResponse as EmptySrvResponse
 
-import cv_bridge
+import cv_bridge # converts between ROS Image messages and OpenCV images.
 bridge = cv_bridge.CvBridge()
 
 TimeIt.print_output = False
@@ -34,7 +34,7 @@ class ViewpointEntropyCalculator:
     This class implements the Grid World portion of the Multi-View controller.
     """
     def __init__(self):
-        self.hist_bins_q = rospy.get_param('~histogram/bins/quality')
+        self.hist_bins_q = rospy.get_param('~histogram/bins/quality') #mvp_grasp.yaml파일에 있는 정보들 
         self.hist_bins_a = rospy.get_param('~histogram/bins/angle')
 
         self.dist_from_best_scale = rospy.get_param('~cost/dist_from_best_scale')
